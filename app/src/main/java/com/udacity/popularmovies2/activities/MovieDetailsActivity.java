@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -125,11 +126,19 @@ public class MovieDetailsActivity extends AppCompatActivity {
         MovieDBHelper dbHelper = new MovieDBHelper(this);
         mDb = dbHelper.getWritableDatabase();
 
-        Cursor cursor = mDb.rawQuery("SELECT * FROM movieTable WHERE _id = ?", new String[]{String.valueOf(movie.id)});
+//        Cursor cursor = mDb.rawQuery("SELECT * FROM movieTable WHERE _id = ?", new String[]{String.valueOf(movie.id)});
+
+        Cursor cursor = getContentResolver().query(
+                MovieContract.MovieEntry.buildMovieUri(movie.id),
+                null,
+                null,
+                null,
+                null
+        );
 
         // if favorite
         if (cursor != null && cursor.moveToFirst()) {
-            long result = mDb.delete(MovieContract.MovieEntry.TABLE_NAME, MovieContract.MovieEntry._ID + " = ?", new String[]{String.valueOf(movie.id)});
+            long result = getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI, MovieContract.MovieEntry._ID + " = ?", new String[]{String.valueOf(movie.id)});
             if (result > 0) {
                 Toast.makeText(this, "Removed from favorites", Toast.LENGTH_LONG).show();
             }
@@ -144,10 +153,16 @@ public class MovieDetailsActivity extends AppCompatActivity {
             values.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movie.releaseDate);
             values.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.voteAverage);
             values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, movie.overview);
-            long result = mDb.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
-            if (result > 0) {
-                Toast.makeText(this, "Added to favorites", Toast.LENGTH_LONG).show();
-            }
+
+            // TODO: check if inserted successfully
+            Uri uri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, values);
+            Toast.makeText(this, "Added to favorites", Toast.LENGTH_LONG).show();
+
+//            long result = mDb.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
+//            if (result > 0) {
+//                Toast.makeText(this, "Added to favorites", Toast.LENGTH_LONG).show();
+//            }
+
         }
     }
 

@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by shareefoo
  */
 
-public class ApiClient {
+public final class ApiClient {
 
     public static final String BASE_URL = " https://api.themoviedb.org/3/movie/";
     private static Retrofit retrofit = null;

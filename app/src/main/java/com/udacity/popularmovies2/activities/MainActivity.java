@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -47,8 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog progressDialog;
     private MovieAdapter movieAdapter;
 
-    private SQLiteDatabase mDb;
-    private MovieDBHelper dbHelper;
+    private Parcelable listState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +56,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        dbHelper = new MovieDBHelper(this);
-
         //
         getPopularMovies(BuildConfig.MOVIE_DB_API_KEY);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable("ListState", recyclerViewMovies.getLayoutManager().onSaveInstanceState());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        listState = savedInstanceState.getParcelable("ListState");
     }
 
     @Override
@@ -107,6 +119,11 @@ public class MainActivity extends AppCompatActivity {
                             recyclerViewMovies.setAdapter(movieAdapter);
                             StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
                             recyclerViewMovies.setLayoutManager(gridLayoutManager);
+
+                            if (listState != null) {
+                                recyclerViewMovies.getLayoutManager().onRestoreInstanceState(listState);
+                            }
+
                         }
 
                     } else {
@@ -178,15 +195,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getFavoriteMovies() {
-
-        mDb = dbHelper.getWritableDatabase();
-
         List<Movie> movies = new ArrayList<>();
 
-        Cursor cursor = mDb.query(
-                MovieContract.MovieEntry.TABLE_NAME,
-                null,
-                null,
+        Cursor cursor = getContentResolver().query(
+                MovieContract.MovieEntry.CONTENT_URI,
                 null,
                 null,
                 null,

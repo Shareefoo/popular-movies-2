@@ -22,14 +22,18 @@
 
         <activity
             android:name=".activities.MovieDetailsActivity"
-            android:parentActivityName=".activities.MainActivity" />
+            android:parentActivityName=".activities.MainActivity">
 
-        <!--<provider-->
-            <!--android:name=".data.MovieProvider"-->
-            <!--android:authorities="com.udacity.popularmovies2"-->
-            <!--android:exported="false"-->
-            <!--android:protectionLevel="signature"-->
-            <!--android:syncable="true" />-->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.MainActivity" />
+
+        </activity>
+
+        <provider
+            android:name=".data.MovieProvider"
+            android:authorities="com.udacity.popularmovies2"
+            android:exported="true" />
 
     </application>
 
